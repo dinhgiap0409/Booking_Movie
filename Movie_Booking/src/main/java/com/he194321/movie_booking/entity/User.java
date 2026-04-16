@@ -29,6 +29,7 @@ public class User {
     @Column(name = "full_name")
     private String fullName;
 
+    @Column(name = "phone")
     private String phone;
 
     @Column(name = "is_active")
