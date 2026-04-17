@@ -21,4 +21,9 @@ public class MovieController {
     public List<Movie> listMovies() {
         return movieService.getAllMovies();
     }
+
+    @GetMapping("/movies/{id}")
+    public Movie getMovieById(@org.springframework.web.bind.annotation.PathVariable Integer id) {
+        return movieService.getMovieById(id);
+    }
 }

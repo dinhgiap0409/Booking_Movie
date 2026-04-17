@@ -23,7 +23,7 @@ public class Booking {
     @JoinColumn(name = "staff_id")
     private User staff; // Ai bán (NULL nếu khách tự đặt online)
 
-    @Column(name = "booking_time", insertable = false, updatable = false)
+    @Column(name = "booking_time")
     private Date bookingTime;
 
     @Column(name = "total_price", nullable = false)
