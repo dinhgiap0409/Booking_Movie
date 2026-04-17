@@ -214,3 +214,5 @@ html, body {
 ::-webkit-scrollbar-track { background: #0a0a0f; }
 ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #dc2626; }
+
+.cinema-header { text-align: center; padding: 4rem 2rem 2rem; } .cinema-header h2 { font-size: 2.5rem; color: #fff; margin-bottom: 0.5rem; } .cinema-header p { color: #aaa; font-size: 1.1rem; }

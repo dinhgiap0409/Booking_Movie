@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import './Dashboard.css';
+import '../styles/Dashboard.css';
 import api from '../api/axiosConfig';
+import Footer from '../components/layout/Footer';
+import ScheduleModal from '../components/booking/ScheduleModal';
+import SeatMapModal from '../components/booking/SeatMapModal';
 import {
     Film, Ticket, Search, Clock, Calendar, Star,
     ChevronLeft, ChevronRight, Play, TrendingUp, Flame,
@@ -88,7 +91,7 @@ const StarRating = ({ rating }) => {
     const stars = Math.round(rating / 2);
     return (
         <div className="star-row">
-            {[1,2,3,4,5].map(i => (
+            {[1, 2, 3, 4, 5].map(i => (
                 <Star key={i} size={12} className={i <= stars ? 'star-filled' : 'star-empty'} />
             ))}
             <span className="rating-num">{rating}</span>
@@ -97,10 +100,10 @@ const StarRating = ({ rating }) => {
 };
 
 // ===================== HERO CAROUSEL =====================
-const HeroCarousel = ({ movies }) => {
+const HeroCarousel = ({ movies, onBook }) => {
     const [current, setCurrent] = useState(0);
     const timerRef = useRef(null);
-    const hotMovies = movies.filter(m => m.isHot).slice(0, 5);
+    const hotMovies = movies.slice(0, 5);
     if (!hotMovies.length) return null;
 
     const goTo = (idx) => setCurrent((idx + hotMovies.length) % hotMovies.length);
@@ -138,7 +141,7 @@ const HeroCarousel = ({ movies }) => {
                 <p className="hero-overview">{movie.overview}</p>
                 <div className="hero-actions">
                     <button className="btn-primary"><Play size={18} /> Xem Trailer</button>
-                    <button className="btn-outline"><Ticket size={18} /> Đặt Vé Ngay</button>
+                    <button className="btn-outline" onClick={() => onBook(movie)}><Ticket size={18} /> Đặt Vé Ngay</button>
                 </div>
             </div>
 
@@ -171,13 +174,13 @@ const HeroCarousel = ({ movies }) => {
 };
 
 // ===================== MOVIE CARD =====================
-const MovieCard = ({ movie }) => {
+const MovieCard = ({ movie, onBook }) => {
     const [hovered, setHovered] = useState(false);
     return (
         <div className={`card ${hovered ? 'card--hovered' : ''}`}
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}>
-            
+
             {/* Poster */}
             <div className="card-poster">
                 <img src={movie.posterPath || 'https://via.placeholder.com/300x450?text=No+Poster'}
@@ -199,10 +202,10 @@ const MovieCard = ({ movie }) => {
                 <StarRating rating={movie.rating} />
                 <div className="card-meta">
                     <div className="card-meta-item"><Clock size={12} />{movie.durationMinutes}p</div>
-                    <div className="card-meta-item"><Calendar size={12} />{movie.releaseDate?.slice(0,7)}</div>
+                    <div className="card-meta-item"><Calendar size={12} />{movie.releaseDate?.slice(0, 7)}</div>
                     <div className="card-meta-item"><TrendingUp size={12} />{(movie.votes / 1000).toFixed(1)}K</div>
                 </div>
-                <button className="btn-book">
+                <button className="btn-book" onClick={() => onBook(movie)}>
                     <Ticket size={15} /> ĐẶT VÉ NGAY
                 </button>
             </div>
@@ -236,19 +239,162 @@ const StatsBar = ({ movies }) => (
 );
 
 // ===================== MAIN DASHBOARD =====================
-const Dashboard = () => {
+const Dashboard = ({ preSelectedMovie, preSelectedSchedule, onBackToShowtimes }) => {
     const [movies, setMovies] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [activeGenre, setActiveGenre] = useState('Tất cả');
     const [sortBy, setSortBy] = useState('rating');
+    const [selectedMovie, setSelectedMovie] = useState(preSelectedMovie || null);
+    const [schedules, setSchedules] = useState([]);
+    const [loadingSchedules, setLoadingSchedules] = useState(false);
+    const [scheduleDate, setScheduleDate] = useState('');
+
+    const [selectedSchedule, setSelectedSchedule] = useState(preSelectedSchedule || null);
+    const [seats, setSeats] = useState([]);
+    const [loadingSeats, setLoadingSeats] = useState(false);
+    const [selectedSeats, setSelectedSeats] = useState([]);
+
+    const fetchSeats = async (schedule) => {
+        const token = localStorage.getItem('token');
+        if (!token || token === 'undefined' || token === 'null') {
+            alert('⚠️ Vui lòng ĐĂNG NHẬP để có thể truy cập hệ thống phòng chiếu và chọn ghế!');
+            if (window.goToLogin) window.goToLogin();
+            return;
+        }
+
+        setSelectedSchedule(schedule);
+        setLoadingSeats(true);
+        setSelectedSeats([]);
+        try {
+            const res = await api.get(`/public/seats/schedule/${schedule.id}`);
+            setSeats(res.data);
+        } catch (e) {
+            console.error('Failed to fetch seats', e);
+            setSeats([]);
+        } finally {
+            setLoadingSeats(false);
+        }
+    };
+
+    useEffect(() => {
+        if (preSelectedMovie) setSelectedMovie(preSelectedMovie);
+        if (preSelectedSchedule) fetchSeats(preSelectedSchedule);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [preSelectedMovie, preSelectedSchedule]);
+
+    const toggleSeat = (seat) => {
+        if (seat.status !== 'AVAILABLE') return;
+        const exists = selectedSeats.find(s => s.id === seat.id);
+        if (exists) {
+            setSelectedSeats(selectedSeats.filter(s => s.id !== seat.id));
+        } else {
+            if (selectedSeats.length >= 8) {
+                alert('Chỉ được chọn tối đa 8 ghế!');
+                return;
+            }
+            setSelectedSeats([...selectedSeats, seat]);
+        }
+    };
+
+    const calculateTotal = () => {
+        let total = 0;
+        const basePrice = selectedSchedule?.price || 80000;
+        selectedSeats.forEach(s => {
+            total += s.seatType === 'VIP' ? basePrice + 20000 : basePrice;
+        });
+        return total;
+    };
+
+    const checkSingleSeatGap = (selected) => {
+        if (selected.length === 0) return null;
+        const rows = {};
+        seats.forEach(s => {
+            const r = s.seatName.charAt(0);
+            if (!rows[r]) rows[r] = [];
+            rows[r].push(s);
+        });
+
+        for (let r in rows) {
+            let rowSeats = rows[r].sort((a, b) => parseInt(a.seatName.substring(1)) - parseInt(b.seatName.substring(1)));
+
+            for (let i = 0; i < rowSeats.length; i++) {
+                let s = rowSeats[i];
+                let isSelectedByUser = selected.some(sel => sel.id === s.id);
+                let isEmpty = s.status === 'AVAILABLE' && !isSelectedByUser;
+
+                if (isEmpty) {
+                    let leftOccupied = (i === 0) || (rowSeats[i - 1].status !== 'AVAILABLE' || selected.some(sel => sel.id === rowSeats[i - 1].id));
+                    let rightOccupied = (i === rowSeats.length - 1) || (rowSeats[i + 1].status !== 'AVAILABLE' || selected.some(sel => sel.id === rowSeats[i + 1].id));
+
+                    if (leftOccupied && rightOccupied) {
+                        let leftWasOccupied = (i === 0) || (rowSeats[i - 1].status !== 'AVAILABLE');
+                        let rightWasOccupied = (i === rowSeats.length - 1) || (rowSeats[i + 1].status !== 'AVAILABLE');
+
+                        if (!leftWasOccupied || !rightWasOccupied) {
+                            return s.seatName;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    };
+
+    const handleHoldSeats = async () => {
+        const gapSeat = checkSingleSeatGap(selectedSeats);
+        if (gapSeat) {
+            alert(`⚠️ Không thể ghép ghế như vậy! Việc chọn của bạn làm tạo ra một khoảng trống duy nhất tại ghế [${gapSeat}]. Vui lòng chọn ghế liền kề nhau để không để lại 1 ghế thừa nhé!`);
+            return;
+        }
+
+        try {
+            const payload = {
+                scheduleId: selectedSchedule.id,
+                seatIds: selectedSeats.map(s => s.id)
+            };
+            const res = await api.post('/public/bookings/hold', payload);
+            alert('🎉 GIỮ CHỖ THÀNH CÔNG! Hóa đơn: ' + res.data.id + '\nTổng tiền: ' + res.data.totalPrice + ' VND.\n(Hệ thống sẽ chuyển sang cổng thanh toán VNPAY...)');
+            fetchSeats(selectedSchedule);
+        } catch (error) {
+            console.error(error);
+            alert(error.response?.data || 'Đã có lỗi xảy ra. Vui lòng chọn ghế khác!');
+        }
+    };
+
+    const fetchSchedules = async (movieId, date = '') => {
+        setLoadingSchedules(true);
+        try {
+            const url = date ? `/public/schedules/movie/${movieId}?date=${date}` : `/public/schedules/movie/${movieId}`;
+            const res = await api.get(url);
+            setSchedules(res.data);
+        } catch (e) {
+            console.error('Failed to fetch schedules', e);
+            setSchedules([]);
+        } finally {
+            setLoadingSchedules(false);
+        }
+    };
+
+    const handleBook = (movie) => {
+        setSelectedMovie(movie);
+        setScheduleDate('');
+        fetchSchedules(movie.id, '');
+    };
 
     useEffect(() => {
         const fetchMovies = async () => {
             try {
                 const response = await api.get('/public/movies');
                 const data = response.data;
-                setMovies(data.length ? data : MOCK_MOVIES);
+                const mappedData = data.map(m => ({
+                    ...m,
+                    genre: m.genres && m.genres.length > 0 ? m.genres[0].name : (m.genre || 'Action'),
+                    rating: m.rating || (Math.random() * 2 + 7).toFixed(1),
+                    votes: m.votes || Math.floor(Math.random() * 5000) + 5000,
+                    isHot: m.isHot !== undefined ? m.isHot : true
+                }));
+                setMovies(mappedData.length ? mappedData : MOCK_MOVIES);
             } catch {
                 setMovies(MOCK_MOVIES);
             } finally {
@@ -263,7 +409,7 @@ const Dashboard = () => {
         .filter(m => m.title?.toLowerCase().includes(searchTerm.toLowerCase()))
         .sort((a, b) => sortBy === 'rating' ? (b.rating || 0) - (a.rating || 0)
             : sortBy === 'newest' ? new Date(b.releaseDate) - new Date(a.releaseDate)
-            : (b.votes || 0) - (a.votes || 0));
+                : (b.votes || 0) - (a.votes || 0));
 
     if (loading) return (
         <div className="loading-screen">
@@ -279,7 +425,7 @@ const Dashboard = () => {
     return (
         <div className="db-root">
             {/* HERO */}
-            <HeroCarousel movies={movies} />
+            <HeroCarousel movies={movies} onBook={handleBook} />
 
             {/* STATS */}
             <StatsBar movies={movies} />
@@ -341,7 +487,7 @@ const Dashboard = () => {
                 {/* Grid */}
                 {filtered.length > 0 ? (
                     <div className="movie-grid">
-                        {filtered.map(movie => <MovieCard key={movie.id} movie={movie} />)}
+                        {filtered.map(movie => <MovieCard key={movie.id} movie={movie} onBook={handleBook} />)}
                     </div>
                 ) : (
                     <div className="empty-state">
@@ -355,17 +501,31 @@ const Dashboard = () => {
                 )}
             </div>
 
-            {/* FOOTER */}
-            <footer className="db-footer">
-                <div className="footer-inner">
-                    <div className="footer-logo">
-                        <Film size={22} />
-                        <span>MOVIX</span>
-                    </div>
-                    <p className="footer-tagline">Trải nghiệm điện ảnh đỉnh cao tại Việt Nam 🎬</p>
-                    <p className="footer-copy">© 2026 MOVIX Cinema System • All rights reserved</p>
-                </div>
-            </footer>
+            <Footer />
+
+            <ScheduleModal
+                selectedMovie={selectedMovie}
+                setSelectedMovie={setSelectedMovie}
+                scheduleDate={scheduleDate}
+                setScheduleDate={setScheduleDate}
+                fetchSchedules={fetchSchedules}
+                loadingSchedules={loadingSchedules}
+                schedules={schedules}
+                fetchSeats={fetchSeats}
+            />
+
+            <SeatMapModal
+                selectedSchedule={selectedSchedule}
+                setSelectedSchedule={setSelectedSchedule}
+                preSelectedMovie={preSelectedMovie}
+                onBackToShowtimes={onBackToShowtimes}
+                loadingSeats={loadingSeats}
+                seats={seats}
+                selectedSeats={selectedSeats}
+                toggleSeat={toggleSeat}
+                calculateTotal={calculateTotal}
+                handleHoldSeats={handleHoldSeats}
+            />
         </div>
     );
 };

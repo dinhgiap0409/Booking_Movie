@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './Login.css';
+import '../styles/Login.css';
 import api from '../api/axiosConfig';
 
 const Login = ({ onLoginSuccess, goToRegister }) => {
