@@ -1,0 +1,216 @@
+/* ============================================================
+   MOVIX — App-level CSS (Navbar, Root, Global)
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Bebas+Neue&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+    margin: 0; padding: 0;
+    font-family: 'Inter', sans-serif;
+    background: #0a0a0f;
+    color: #e2e8f0;
+    scroll-behavior: smooth;
+}
+
+#root {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    text-align: left;
+    border: none;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+}
+
+.app-root {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: #0a0a0f;
+}
+
+.app-main {
+    flex: 1;
+}
+
+/* ══════════════════════════════════════════════════════════
+   NAVBAR
+══════════════════════════════════════════════════════════ */
+.app-nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10, 10, 15, 0.4);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    transition: all 0.4s ease;
+}
+.app-nav--scrolled {
+    background: rgba(10, 10, 15, 0.85);
+    border-bottom-color: rgba(255,255,255,0.1);
+    box-shadow: 0 4px 32px rgba(0,0,0,0.5);
+}
+
+.nav-inner {
+    max-width: 1380px; margin: 0 auto;
+    padding: 0 32px;
+    height: 68px;
+    display: flex; align-items: center; gap: 32px;
+}
+
+/* Logo */
+.nav-logo {
+    display: flex; align-items: center; gap: 10px;
+    cursor: pointer; flex-shrink: 0;
+    text-decoration: none;
+}
+.nav-logo-icon {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    color: #fff; border-radius: 10px;
+    width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 12px rgba(220,38,38,0.4);
+    transition: transform 0.3s ease;
+}
+.nav-logo:hover .nav-logo-icon { transform: scale(1.1); }
+.nav-logo-text {
+    font-size: 22px; font-weight: 900; color: #fff;
+    letter-spacing: -0.5px; font-family: 'Bebas Neue', sans-serif;
+}
+.nav-logo-accent { color: #dc2626; }
+
+/* Links */
+.nav-links {
+    display: flex; align-items: center; gap: 4px;
+    flex: 1;
+}
+@media (max-width: 768px) { .nav-links { display: none; } }
+
+.nav-link {
+    position: relative;
+    background: none; border: none; cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px; font-weight: 700; letter-spacing: 1.2px;
+    color: #64748b; padding: 8px 14px; border-radius: 8px;
+    transition: color 0.2s ease, background 0.2s ease;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.nav-link:hover { color: #e2e8f0; background: rgba(255,255,255,0.04); }
+.nav-link--active { color: #fff; }
+.nav-link-bar {
+    position: absolute; bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 20px; height: 2px;
+    background: linear-gradient(90deg, #dc2626, #f87171);
+    border-radius: 1px;
+    box-shadow: 0 0 8px rgba(220,38,38,0.6);
+}
+
+/* Auth */
+.nav-auth {
+    display: flex; align-items: center; gap: 10px; margin-left: auto;
+}
+@media (max-width: 768px) { .nav-auth { display: none; } }
+
+.nav-btn-login {
+    display: flex; align-items: center; gap: 7px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #cbd5e1; font-size: 13px; font-weight: 600;
+    padding: 9px 18px; border-radius: 10px;
+    cursor: pointer; font-family: 'Inter', sans-serif;
+    transition: all 0.25s ease;
+}
+.nav-btn-login:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.25);
+    color: #fff;
+}
+
+.nav-btn-primary {
+    display: flex; align-items: center; gap: 7px;
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    border: none; color: #fff;
+    font-size: 13px; font-weight: 700;
+    padding: 9px 18px; border-radius: 10px;
+    cursor: pointer; font-family: 'Inter', sans-serif;
+    box-shadow: 0 3px 12px rgba(220,38,38,0.4);
+    transition: all 0.25s ease;
+}
+.nav-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(220,38,38,0.55);
+}
+
+/* Mobile toggle */
+.nav-mobile-toggle {
+    display: none;
+    background: none; border: none; color: #e2e8f0;
+    cursor: pointer; margin-left: auto;
+    padding: 6px;
+}
+@media (max-width: 768px) { .nav-mobile-toggle { display: flex; } }
+
+/* Mobile menu */
+.nav-mobile-menu {
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding: 16px 24px 24px;
+    display: flex; flex-direction: column; gap: 4px;
+    background: rgba(10,10,15,0.96);
+    animation: slideDown 0.25s ease;
+}
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.nav-mobile-link {
+    background: none; border: none; color: #64748b;
+    font-size: 13px; font-weight: 700; letter-spacing: 1px;
+    padding: 12px 8px; text-align: left; cursor: pointer;
+    border-radius: 8px; transition: all 0.2s ease;
+    font-family: 'Inter', sans-serif;
+}
+.nav-mobile-link:hover { color: #fff; background: rgba(255,255,255,0.05); }
+.nav-mobile-link--active { color: #f87171; }
+.nav-mobile-auth {
+    display: flex; gap: 10px; margin-top: 12px; padding-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+/* ══════════════════════════════════════════════════════════
+   COMING SOON PAGE
+══════════════════════════════════════════════════════════ */
+.coming-soon {
+    min-height: calc(100vh - 68px);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 16px; text-align: center; padding: 40px;
+    background: #0a0a0f;
+}
+.coming-soon-icon { font-size: 72px; }
+.coming-soon h2 { font-size: 28px; font-weight: 800; color: #fff; margin: 0; }
+.coming-soon p { color: #475569; margin: 0; }
+
+.btn-primary-app {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    color: #fff; font-size: 14px; font-weight: 700;
+    padding: 12px 24px; border-radius: 12px; border: none;
+    cursor: pointer; margin-top: 8px;
+    box-shadow: 0 4px 16px rgba(220,38,38,0.4);
+    transition: all 0.3s ease; font-family: 'Inter', sans-serif;
+}
+.btn-primary-app:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(220,38,38,0.5);
+}
+
+/* ══════════════════════════════════════════════════════════
+   SCROLLBAR GLOBAL
+══════════════════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #0a0a0f; }
+::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #dc2626; }
