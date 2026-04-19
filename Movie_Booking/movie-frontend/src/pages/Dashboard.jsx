@@ -4,6 +4,7 @@ import api from '../api/axiosConfig';
 import Footer from '../components/layout/Footer';
 import ScheduleModal from '../components/booking/ScheduleModal';
 import SeatMapModal from '../components/booking/SeatMapModal';
+import PaymentModal from '../components/booking/PaymentModal';
 import {
     Film, Ticket, Search, Clock, Calendar, Star,
     ChevronLeft, ChevronRight, Play, TrendingUp, Flame,
@@ -254,6 +255,7 @@ const Dashboard = ({ preSelectedMovie, preSelectedSchedule, onBackToShowtimes })
     const [seats, setSeats] = useState([]);
     const [loadingSeats, setLoadingSeats] = useState(false);
     const [selectedSeats, setSelectedSeats] = useState([]);
+    const [pendingBooking, setPendingBooking] = useState(null);
 
     const fetchSeats = async (schedule) => {
         const token = localStorage.getItem('token');
@@ -351,11 +353,13 @@ const Dashboard = ({ preSelectedMovie, preSelectedSchedule, onBackToShowtimes })
         try {
             const payload = {
                 scheduleId: selectedSchedule.id,
-                seatIds: selectedSeats.map(s => s.id)
+                seatIds: selectedSeats.map(s => s.id),
+                username: localStorage.getItem('username')
             };
             const res = await api.post('/public/bookings/hold', payload);
-            alert('🎉 GIỮ CHỖ THÀNH CÔNG! Hóa đơn: ' + res.data.id + '\nTổng tiền: ' + res.data.totalPrice + ' VND.\n(Hệ thống sẽ chuyển sang cổng thanh toán VNPAY...)');
-            fetchSeats(selectedSchedule);
+            setPendingBooking(res.data);
+            setSelectedSchedule(null); // Đóng SeatMap
+            setSelectedSeats([]);
         } catch (error) {
             console.error(error);
             alert(error.response?.data || 'Đã có lỗi xảy ra. Vui lòng chọn ghế khác!');
@@ -525,6 +529,15 @@ const Dashboard = ({ preSelectedMovie, preSelectedSchedule, onBackToShowtimes })
                 toggleSeat={toggleSeat}
                 calculateTotal={calculateTotal}
                 handleHoldSeats={handleHoldSeats}
+            />
+
+            <PaymentModal 
+                booking={pendingBooking}
+                onClose={() => setPendingBooking(null)}
+                onSuccess={() => {
+                    setPendingBooking(null);
+                    // Có thể refetch gì đó ở đây nếu cần thiết, ví dụ fetch movies để đếm vé
+                }}
             />
         </div>
     );

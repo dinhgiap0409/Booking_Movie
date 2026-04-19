@@ -60,6 +60,9 @@ const Header = ({
                                     {currentUser.fullName || currentUser.username}
                                 </span>
                             </div>
+                            <button className="nav-btn-login" onClick={() => setActivePage('history')} style={{ marginRight: '8px', background: 'transparent', border: '1px solid #444', color: '#fff' }}>
+                                Lịch Sử
+                            </button>
                             <button className="nav-btn-login" onClick={handleLogout}>
                                 Đăng Xuất
                             </button>
@@ -97,18 +100,37 @@ const Header = ({
                         </button>
                     ))}
                     <div className="nav-mobile-auth">
-                        <button className="nav-btn-login" onClick={() => {
-                            setActivePage('register');
-                            setMobileOpen(false);
-                        }}>
-                            <UserPlus size={16} /> Đăng Ký
-                        </button>
+                        {currentUser ? (
+                            <>
+                                <button className="nav-btn-login" onClick={() => {
+                                    setActivePage('history');
+                                    setMobileOpen(false);
+                                }}>
+                                    Lịch Sử Mua Vé
+                                </button>
+                                <button className="nav-btn-primary" onClick={() => {
+                                    handleLogout();
+                                    setMobileOpen(false);
+                                }}>
+                                    Đăng Xuất
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <button className="nav-btn-login" onClick={() => {
+                                    setActivePage('register');
+                                    setMobileOpen(false);
+                                }}>
+                                    <UserPlus size={16} /> Đăng Ký
+                                </button>
                         <button className="nav-btn-primary" onClick={() => {
                             setActivePage('login');
                             setMobileOpen(false);
                         }}>
                             <LogIn size={16} /> Đăng Nhập
                         </button>
+                            </>
+                        )}
                     </div>
                 </div>
             )}

@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Integer> {
+    java.util.List<Booking> findByCustomer_UsernameOrderByBookingTimeDesc(String username);
 }
