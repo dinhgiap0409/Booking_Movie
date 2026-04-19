@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        .container { font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: auto; padding: 30px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .header { color: #dc2626; text-align: center; font-size: 26px; font-weight: 800; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 1px; }
+        .greeting { color: #1e293b; font-size: 16px; margin-bottom: 12px; }
+        .ticket-info { background: #f8fafc; padding: 24px; border-radius: 12px; margin: 24px 0; border: 1px solid #e2e8f0; }
+        .movie-title { margin-top: 0; color: #0f172a; font-size: 22px; font-weight: 700; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 16px; }
+        .info-row { margin: 10px 0; color: #475569; font-size: 15px; }
+        .info-label { font-weight: 600; color: #334155; display: inline-block; width: 110px; }
+        .total-price { color: #dc2626; font-weight: 800; font-size: 18px; margin-top: 16px; border-top: 1px dashed #cbd5e1; padding-top: 16px; }
+        .qr-section { text-align: center; margin-top: 32px; background: #f1f5f9; padding: 24px; border-radius: 12px; }
+        .qr-text { color: #1e293b; margin-bottom: 16px; font-weight: 600; font-size: 15px;}
+        .qr-image { width: 200px; height: 200px; border: 2px solid #cbd5e1; padding: 8px; border-radius: 8px; background: white; }
+        .footer { text-align: center; color: #94a3b8; margin-top: 32px; font-size: 12px; line-height: 1.6; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">VÉ ĐIỆN TỬ MOVIX</div>
+        <div class="greeting">Xin chào <strong>{{customerName}}</strong>,</div>
+        <p style="color: #475569; margin: 0; line-height: 1.5;">Cảm ơn bạn đã lựa chọn hệ thống MOVIX. Giao dịch đặt vé của bạn đã hoàn tất thành công. Đây là thông tin chi tiết:</p>
+        
+        <div class="ticket-info">
+            <h3 class="movie-title">{{movieName}}</h3>
+            <div class="info-row"><span class="info-label">Ngày xem:</span> <strong>{{scheduleDate}}</strong></div>
+            <div class="info-row"><span class="info-label">Giờ chiếu:</span> <strong>{{scheduleTime}}</strong></div>
+            <div class="info-row"><span class="info-label">Phòng chiếu:</span> <strong>{{roomName}}</strong></div>
+            <div class="info-row" style="margin-top: 12px;"><span class="info-label">Mã ghế:</span> <strong style="color: #0f172a; font-size: 18px; background: #e2e8f0; padding: 4px 10px; border-radius: 6px;">{{seatsList}}</strong></div>
+            <div class="total-price">Đã thanh toán: {{totalPrice}} VNĐ</div>
+        </div>
+
+        <div class="qr-section">
+            <p class="qr-text">📸 Vui lòng giơ điện thoại hiển thị mã QR này cho nhân viên soát vé trước khi vào rạp</p>
+            <img src="{{qrUrl}}" alt="Mã QR soát vé" class="qr-image" />
+        </div>
+
+        <div class="footer">
+            Đây là hình thức phát hành vé số hóa, bảo vệ môi trường.<br/>
+            Mã QR này chỉ có giá trị sử dụng 1 lần duy nhất.<br/>
+            © 2026 MOVIX Cinema System
+        </div>
+    </div>
+</body>
+</html>

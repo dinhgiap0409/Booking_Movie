@@ -3,6 +3,7 @@ import Dashboard from './pages/Dashboard';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import ShowtimesPage from './pages/ShowtimesPage';
+import HistoryPage from './pages/HistoryPage';
 import Header from './components/layout/Header';
 import { Film, UserPlus, LogIn, Menu, X } from 'lucide-react';
 import './styles/App.css';
@@ -119,6 +120,10 @@ function App() {
                         setSeatScheduleContext(sch);
                         setActivePage('home');
                     }} />
+                )}
+                
+                {activePage === 'history' && (
+                    <HistoryPage />
                 )}
                 
                 {activePage === 'cinema' && (
