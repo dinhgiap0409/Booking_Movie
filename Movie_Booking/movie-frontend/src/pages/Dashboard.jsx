@@ -5,6 +5,7 @@ import Footer from '../components/layout/Footer';
 import ScheduleModal from '../components/booking/ScheduleModal';
 import SeatMapModal from '../components/booking/SeatMapModal';
 import PaymentModal from '../components/booking/PaymentModal';
+import TrailerModal from '../components/movie/TrailerModal';
 import {
     Film, Ticket, Search, Clock, Calendar, Star,
     ChevronLeft, ChevronRight, Play, TrendingUp, Flame,
@@ -101,7 +102,7 @@ const StarRating = ({ rating }) => {
 };
 
 // ===================== HERO CAROUSEL =====================
-const HeroCarousel = ({ movies, onBook }) => {
+const HeroCarousel = ({ movies, onBook, onPlayTrailer }) => {
     const [current, setCurrent] = useState(0);
     const timerRef = useRef(null);
     const hotMovies = movies.slice(0, 5);
@@ -141,7 +142,7 @@ const HeroCarousel = ({ movies, onBook }) => {
                 </div>
                 <p className="hero-overview">{movie.overview}</p>
                 <div className="hero-actions">
-                    <button className="btn-primary"><Play size={18} /> Xem Trailer</button>
+                    <button className="btn-primary" onClick={() => onPlayTrailer(movie)}><Play size={18} /> Xem Trailer</button>
                     <button className="btn-outline" onClick={() => onBook(movie)}><Ticket size={18} /> Đặt Vé Ngay</button>
                 </div>
             </div>
@@ -175,7 +176,7 @@ const HeroCarousel = ({ movies, onBook }) => {
 };
 
 // ===================== MOVIE CARD =====================
-const MovieCard = ({ movie, onBook }) => {
+const MovieCard = ({ movie, onBook, onPlayTrailer }) => {
     const [hovered, setHovered] = useState(false);
     return (
         <div className={`card ${hovered ? 'card--hovered' : ''}`}
@@ -187,7 +188,7 @@ const MovieCard = ({ movie, onBook }) => {
                 <img src={movie.posterPath || 'https://via.placeholder.com/300x450?text=No+Poster'}
                     alt={movie.title} className="card-img" />
                 <div className="card-poster-overlay">
-                    <div className="card-play"><Play size={28} /></div>
+                    <div className="card-play" onClick={(e) => { e.stopPropagation(); onPlayTrailer(movie); }}><Play size={28} /></div>
                     <p className="card-overview">{movie.overview || 'Chưa có mô tả.'}</p>
                 </div>
                 {movie.isHot && <div className="card-badge card-badge--hot"><Flame size={10} /> HOT</div>}
@@ -256,6 +257,7 @@ const Dashboard = ({ preSelectedMovie, preSelectedSchedule, onBackToShowtimes })
     const [loadingSeats, setLoadingSeats] = useState(false);
     const [selectedSeats, setSelectedSeats] = useState([]);
     const [pendingBooking, setPendingBooking] = useState(null);
+    const [trailerMovie, setTrailerMovie] = useState(null);
 
     const fetchSeats = async (schedule) => {
         const token = localStorage.getItem('token');
@@ -429,7 +431,7 @@ const Dashboard = ({ preSelectedMovie, preSelectedSchedule, onBackToShowtimes })
     return (
         <div className="db-root">
             {/* HERO */}
-            <HeroCarousel movies={movies} onBook={handleBook} />
+            <HeroCarousel movies={movies} onBook={handleBook} onPlayTrailer={setTrailerMovie} />
 
             {/* STATS */}
             <StatsBar movies={movies} />
@@ -491,7 +493,7 @@ const Dashboard = ({ preSelectedMovie, preSelectedSchedule, onBackToShowtimes })
                 {/* Grid */}
                 {filtered.length > 0 ? (
                     <div className="movie-grid">
-                        {filtered.map(movie => <MovieCard key={movie.id} movie={movie} onBook={handleBook} />)}
+                        {filtered.map(movie => <MovieCard key={movie.id} movie={movie} onBook={handleBook} onPlayTrailer={setTrailerMovie} />)}
                     </div>
                 ) : (
                     <div className="empty-state">
@@ -538,6 +540,11 @@ const Dashboard = ({ preSelectedMovie, preSelectedSchedule, onBackToShowtimes })
                     setPendingBooking(null);
                     // Có thể refetch gì đó ở đây nếu cần thiết, ví dụ fetch movies để đếm vé
                 }}
+            />
+
+            <TrailerModal 
+                movie={trailerMovie}
+                onClose={() => setTrailerMovie(null)}
             />
         </div>
     );
